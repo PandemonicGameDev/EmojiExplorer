@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emoji Explorer · Discord Shortcodes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/00c8fb76d4.js" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #111111;
+      --surface: #1a1a1a;
+      --surface-2: #212121;
+      --surface-3: #2a2a2a;
+      --border: #2e2e2e;
+      --border-2: #3c3c3c;
+      --text: #e6e6e6;
+      --text-2: #aaaaaa;
+      --text-3: #777777;
+
+      --accent: #ffaa00;
+      --accent-hover: #ffbb33;
+      --accent-fg: #1a1a1a;
+      --danger: #ff5555;
+
+      --shadow-1: 0 1px 2px rgba(0,0,0,0.4);
+      --shadow-2: 0 2px 8px rgba(0,0,0,0.4);
+      --shadow-3: 0 8px 24px rgba(0,0,0,0.5);
+      --shadow-4: 0 16px 48px rgba(0,0,0,0.6);
+
+      --header-h: 0px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 400;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    body.modal-open { overflow: hidden; }
+
+    header {
+      background: var(--surface);
+      padding: 1.1rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: var(--shadow-1);
+    }
+
+    header h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    header h1 svg {
+      color: var(--accent);
+      margin-right: 0.5rem;
+    }
+
+    .header-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .view-toggle {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background: var(--bg);
+      color: var(--text-2);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .view-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .search-box {
+      position: relative;
+      min-width: 300px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.6rem 1rem 0.6rem 2.4rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-2);
+    }
+
+    .search-box > svg {
+      position: absolute;
+      left: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.85rem;
+      color: var(--text-2);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .version-select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding: 0.6rem 2.2rem 0.6rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background-color: var(--bg);
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23aaaaaa' d='M6 8 0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.8rem center;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      flex-shrink: 0;
+    }
+
+    .version-select:focus {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-2);
+    }
+
+    .category-filter {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.4rem;
+      padding: 0.7rem 2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .category-filter::-webkit-scrollbar { display: none; }
+
+    .category-btn {
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-2);
+      background: transparent;
+      color: var(--text-2);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .category-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .category-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-fg);
+      box-shadow: var(--shadow-1);
+    }
+
+    .stats {
+      padding: 0.5rem 2rem;
+      font-size: 0.78rem;
+      color: var(--text-3);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .emoji-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0.4rem 2rem 4rem;
+      width: 100%;
+    }
+
+    .emoji-section { margin-bottom: 0.25rem; }
+
+    .subcat-header {
+      position: sticky;
+      top: var(--header-h, 0px);
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.8rem 0.25rem 0.5rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-2);
+    }
+
+    .subcat-title {
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subcat-count {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text-3);
+      background: var(--surface);
+      padding: 0.1rem 0.55rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+      gap: 0.45rem;
+      padding-top: 0.4rem;
+      padding-bottom: 0.75rem;
+    }
+
+    .emoji-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.3rem;
+      padding: 0.7rem 0.35rem;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.12s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      user-select: none;
+      text-align: center;
+    }
+
+    .emoji-card:hover {
+      background: var(--surface-2);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-2);
+    }
+
+    .emoji-card:active {
+      transform: scale(0.97);
+    }
+
+    .emoji-card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .emoji-char {
+      font-size: 1.8rem;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .emoji-name {
+      font-size: 0.62rem;
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--text-2);
+      white-space: normal;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .new-badge {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: var(--accent);
+      color: var(--accent-fg);
+      font-size: 0.48rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      line-height: 1.3;
+      pointer-events: none;
+    }
+
+    .variant-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: var(--surface-3);
+      color: var(--text-2);
+      font-size: 0.5rem;
+      font-weight: 700;
+      line-height: 1.3;
+      pointer-events: none;
+      border: 1px solid var(--border-2);
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 2rem 0;
+    }
+
+    .page-btn {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-info {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.68);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 420px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.5rem;
+      position: relative;
+      box-shadow: var(--shadow-4);
+      transform: translateY(12px) scale(0.98);
+      transition: transform 0.2s ease;
+      text-align: center;
+    }
+
+    .modal-overlay.open .modal { transform: none; }
+
+    .modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: var(--surface-2);
+      color: var(--text-2);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .modal-close:hover {
+      background: var(--danger);
+      color: #ffffff;
+    }
+
+    .modal-emoji {
+      font-size: 4.5rem;
+      line-height: 1.1;
+      margin: 0.5rem 0 0.6rem;
+      word-break: break-word;
+      user-select: none;
+      cursor: pointer;
+      scale: 1;
+      transition: scale 0.25s ease;
+    }
+    .modal-emoji:hover {
+      scale: 1.1;
+    }
+
+    .variation-section { margin-bottom: 1rem; }
+    .variation-section:last-of-type { margin-bottom: 1.1rem; }
+
+    .variation-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 0.4rem;
+    }
+
+    .variation-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem;
+    }
+
+    .variation-thumb {
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      line-height: 1;
+      background: var(--bg);
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+
+    .variation-thumb:hover {
+      background: var(--surface-2);
+      border-color: var(--accent);
+    }
+
+    .variation-thumb.selected {
+      border-color: var(--accent);
+      background: var(--surface-2);
+      box-shadow: var(--shadow-1);
+    }
+
+    .variation-thumb:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 1.1rem;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .modal-info {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.5rem 1rem;
+      text-align: left;
+      font-size: 0.82rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-info dt {
+      color: var(--text-3);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .modal-info dd {
+      color: var(--text);
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .modal-code {
+      display: block;
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-2);
+      background: var(--bg);
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      word-break: break-all;
+      margin-bottom: 0;
+    }
+
+    .modal-code:hover {
+      background: var(--surface-2);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-1);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--accent);
+      color: var(--accent-fg);
+      padding: 0.65rem 1.4rem;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-3);
+      opacity: 0;
+      transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.28s;
+      pointer-events: none;
+      z-index: 300;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .loading, .error {
+      text-align: center;
+      padding: 4rem 2rem;
+      font-size: 1rem;
+      color: var(--text-2);
+    }
+
+    .error { color: var(--danger); }
+
+    .spinner {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border: 3px solid var(--border-2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 0.85rem 1rem; }
+      header h1 { font-size: 1.1rem; }
+      .header-controls { width: 100%; }
+      .search-box { min-width: 0; flex: 1 1 auto; }
+      .version-select { width: 100%; }
+      .category-filter, .stats { padding-left: 1rem; padding-right: 1rem; }
+      .emoji-container { padding: 0 0.75rem 3rem; }
+      .emoji-grid {
+        gap: 0.4rem;
+        grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+      }
+      .emoji-card { padding: 0.6rem 0.25rem; }
+      .emoji-char { font-size: 1.7rem; }
+      .emoji-name { font-size: 0.6rem; }
+      .modal-emoji { font-size: 4rem; }
+      .subcat-header { padding-top: 0.6rem; padding-bottom: 0.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><i class="fa-regular fa-face-smile"></i>Emoji Explorer</h1>
+    <div class="header-controls">
+      <button id="viewToggle" class="view-toggle active" aria-label="Toggle grouping" title="Group by subcategory">
+        <i class="fa-solid fa-border-all"></i>
+      </button>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Search emojis or subcategories…" autocomplete="off">
+      </div>
+      <select id="versionSelect" class="version-select" aria-label="Filter by emoji version">
+        <option value="all">All versions</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="category-filter" id="categoryFilter"></div>
+
+  <div class="stats" id="stats">Loading emojis…</div>
+
+  <main id="emojiContainer" class="emoji-container">
+    <div class="loading"><span class="spinner"></span> Fetching emoji data…</div>
+  </main>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-emoji" id="modalEmoji"></div>
+      <div class="variation-section" id="skinSection">
+        <div class="variation-label">Skin tones</div>
+        <div class="variation-gallery" id="skinGallery"></div>
+      </div>
+      <div class="variation-section" id="relatedSection">
+        <div class="variation-label">Variants</div>
+        <div class="variation-gallery" id="relatedGallery"></div>
+      </div>
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <dl class="modal-info" id="modalInfo"></dl>
+      <div class="modal-code" id="modalCode" title="Click to copy"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied!</div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const FALLBACK_VERSION = '16.0.0';
+      const VERSION_META_API = 'https://data.jsdelivr.com/v1/packages/npm/emoji-datasource';
+      const ITEMS_PER_PAGE = 250;
+
+      let allEmojis = [];
+      let familyByEmoji = new Map();
+      let filteredFamilies = [];
+      let activeCategory = 'All';
+      let activeVersion = 'all';
+      let searchTerm = '';
+      let currentPage = 1;
+      let currentEmoji = null;
+      let currentVariation = null;
+      let currentFamily = null;
+      let newestEmojiVersion = '0';
+      let packageVersion = FALLBACK_VERSION;
+      let groupedView = true;
+
+      const containerEl      = document.getElementById('emojiContainer');
+      const searchInput      = document.getElementById('searchInput');
+      const categoryFilterEl = document.getElementById('categoryFilter');
+      const versionSelect    = document.getElementById('versionSelect');
+      const statsEl          = document.getElementById('stats');
+      const toastEl          = document.getElementById('toast');
+      const viewToggleBtn    = document.getElementById('viewToggle');
+
+      const modalOverlay     = document.getElementById('modalOverlay');
+      const modalEmoji       = document.getElementById('modalEmoji');
+      const modalTitle       = document.getElementById('modalTitle');
+      const modalCode        = document.getElementById('modalCode');
+      const modalInfo        = document.getElementById('modalInfo');
+      const modalClose       = document.getElementById('modalClose');
+      const skinSection      = document.getElementById('skinSection');
+      const skinGallery      = document.getElementById('skinGallery');
+      const relatedSection   = document.getElementById('relatedSection');
+      const relatedGallery   = document.getElementById('relatedGallery');
+
+      // convert a codepoint string like "1F600" or "1F1EA-1F1F8" to the emoji character
+      function unifiedToChar(unified) {
+        if (!unified) return '';
+        return unified.split('-').map(h => String.fromCodePoint(parseInt(h, 16))).join('');
+      }
+
+      // wrap a field that might be a string, array, or null into a flat array
+      function toArray(value) {
+        if (value == null) return [];
+        return Array.isArray(value) ? value : [value];
+      }
+
+      // turn "red_apple" or "red-apple" into "Red Apple" for card labels
+      function displayName(emoji) {
+        return emoji.short_name.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+
+      // "CAT FACE" -> "Cat face"
+      function modalDisplayName(emoji) {
+        const raw = (emoji.name || emoji.short_name).toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+        return raw.charAt(0).toUpperCase() + raw.slice(1);
+      }
+
+      // turn "face-smiling" or "face_smiling" into "Face Smiling"
+      function prettySubcategory(sub) {
+        if (!sub) return 'Other';
+        return sub.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+
+      // lowercase and unify dashes, underscores, and ampersands so search is forgiving
+      function normalize(s) {
+        return (s || '').toLowerCase().replace(/[-_&]+/g, ' ').replace(/\s+/g, ' ').trim();
+      }
+
+      // compare dotted version strings numerically: "15.1" > "9.0"
+      function compareVersions(a, b) {
+        const pa = String(a).split('.').map(Number);
+        const pb = String(b).split('.').map(Number);
+        const len = Math.max(pa.length, pb.length);
+        for (let i = 0; i < len; i++) {
+          const x = pa[i] || 0;
+          const y = pb[i] || 0;
+          if (x !== y) return x - y;
+        }
+        return 0;
+      }
+
+      // show a short toast message, hide after 1.6s
+      let toastTimer = null;
+      function showToast(message) {
+        toastEl.textContent = message;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1600);
+      }
+
+      // copy text to clipboard, fall back to execCommand on older browsers
+      async function copyToClipboard(text) {
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast('Copied ' + text);
+        } catch (err) {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+            showToast('Copied ' + text);
+          } catch (e) {
+            showToast('Copy failed — please copy manually');
+          }
+          document.body.removeChild(ta);
+        }
+      }
+
+      // keep the sticky subcategory header offset in sync with the main header height
+      function measureHeaderHeight() {
+        const header = document.querySelector('header');
+        if (header) document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+      }
+
+      // only group emojis inside person-* subcategories; this prevents grouping flags, food, family
+      function isPersonEmoji(emoji) {
+        return (emoji.subcategory || '').startsWith('person-');
+      }
+
+      // group by base codepoint, but if the base is a generic person, group by the ZWJ sequence
+      function getGroupKey(emoji) {
+        const genericBases = ['1F9D1', '1F468', '1F469', '1F9D2', '1F466', '1F467'];
+        const parts = emoji.unified.split('-');
+        const base = parts[0];
+        if (genericBases.includes(base)) {
+          return parts.slice(1).join('-') || base;
+        }
+        return base;
+      }
+
+      // higher score = better representative; single-codepoint emojis always win
+      function scoreRepresentative(emoji) {
+        const parts = emoji.unified.split('-');
+        const zwjCount = parts.filter(p => p === '200D').length;
+        const hasSkin = parts.some(p => p >= '1F3FB' && p <= '1F3FF');
+        let score = 0;
+        if (parts.length === 1) score += 10000;
+        score -= zwjCount * 1000;
+        if (hasSkin) score -= 500;
+        score -= emoji.short_name.length;
+        return score;
+      }
+
+      // pick the most generic emoji from a family to represent it on a card
+      function pickRepresentative(members) {
+        return [...members].sort((a, b) => {
+          const sa = scoreRepresentative(a);
+          const sb = scoreRepresentative(b);
+          if (sa !== sb) return sb - sa;
+          return a.short_name.localeCompare(b.short_name);
+        })[0];
+      }
+
+      // group emojis into families using the group key, plus any obsoletes links
+      function buildFamilies() {
+        const parent = new Map();
+        allEmojis.forEach(e => parent.set(e, e));
+
+        function find(x) {
+          const p = parent.get(x);
+          if (p === x) return x;
+          const root = find(p);
+          parent.set(x, root);
+          return root;
+        }
+
+        function union(a, b) {
+          const ra = find(a), rb = find(b);
+          if (ra !== rb) parent.set(ra, rb);
+        }
+
+        const byKey = new Map();
+        allEmojis.forEach(e => {
+          if (!isPersonEmoji(e)) return;
+          const k = e.category + '|' + e.subcategory + '|' + getGroupKey(e);
+          if (!byKey.has(k)) byKey.set(k, []);
+          byKey.get(k).push(e);
+        });
+        byKey.forEach(members => {
+          for (let i = 1; i < members.length; i++) union(members[0], members[i]);
+        });
+
+        const byUnified = new Map();
+        allEmojis.forEach(e => byUnified.set(e.unified, e));
+        allEmojis.forEach(e => {
+          if (!isPersonEmoji(e)) return;
+          toArray(e.obsoletes).forEach(u => {
+            const other = byUnified.get(u);
+            if (other && isPersonEmoji(other)) union(e, other);
+          });
+        });
+
+        const groups = new Map();
+        allEmojis.forEach(e => {
+          const root = find(e);
+          if (!groups.has(root)) groups.set(root, []);
+          groups.get(root).push(e);
+        });
+
+        familyByEmoji = new Map();
+        groups.forEach(members => {
+          const family = { representative: pickRepresentative(members), members };
+          members.forEach(m => familyByEmoji.set(m, family));
+        });
+      }
+
+      // ask jsDelivr for the latest published package version
+      async function getLatestPackageVersion() {
+        try {
+          const res = await fetch(VERSION_META_API);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+
+          if (data.tags && data.tags.latest && /^\d+\.\d+\.\d+$/.test(data.tags.latest)) {
+            return data.tags.latest;
+          }
+
+          const versions = (data.versions || [])
+            .map(v => v.version)
+            .filter(v => /^\d+\.\d+\.\d+$/.test(v))
+            .sort(compareVersions);
+
+          return versions[versions.length - 1] || FALLBACK_VERSION;
+        } catch (err) {
+          console.warn('Version lookup failed, using fallback:', err);
+          return FALLBACK_VERSION;
+        }
+      }
+
+      // fetch emoji data from the CDN, trim it down, and build the UI
+      async function fetchEmojis() {
+        try {
+          const url = 'https://cdn.jsdelivr.net/npm/emoji-datasource@' + packageVersion + '/emoji.json';
+          const res = await fetch(url);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+
+          // Create lean objects, stripping out heavy unused fields
+          // and pre-computing the search string to save CPU and memory
+          allEmojis = data.filter(e => e.short_name && e.unified && e.category).map(e => {
+            const lean = {
+              name: e.name,
+              unified: e.unified,
+              short_name: e.short_name,
+              short_names: e.short_names,
+              category: e.category,
+              subcategory: e.subcategory,
+              added_in: e.added_in,
+              obsoletes: e.obsoletes,
+              skin_variations: null
+            };
+
+            if (e.skin_variations) {
+              lean.skin_variations = {};
+              for (const [k, v] of Object.entries(e.skin_variations)) {
+                lean.skin_variations[k] = {
+                  unified: v.unified,
+                  added_in: v.added_in
+                };
+              }
+            }
+
+            lean._search = normalize(
+              lean.name + ' ' + 
+              lean.short_name + ' ' + 
+              (lean.short_names || []).join(' ') + ' ' + 
+              lean.subcategory + ' ' + 
+              lean.category
+            );
+
+            return lean;
+          });
+
+          newestEmojiVersion = allEmojis.reduce((max, e) => {
+            const v = String(e.added_in || '0');
+            return compareVersions(v, max) > 0 ? v : max;
+          }, '0');
+
+          buildFamilies();
+          buildCategoryButtons(['All', ...[...new Set(allEmojis.map(e => e.category))].sort()]);
+          buildVersionOptions();
+
+          activeVersion = 'all';
+          versionSelect.value = 'all';
+
+          applyFilters();
+          requestAnimationFrame(measureHeaderHeight);
+        } catch (err) {
+          console.error('Failed to load emoji data:', err);
+          containerEl.innerHTML =
+            '<div class="error">⚠️ Could not load emoji data.<br>' +
+            '<small>' + err.message + '</small><br><br>' +
+            'Check your connection and refresh.</div>';
+          statsEl.textContent = 'Error loading data';
+        }
+      }
+
+      // build the top-level category pills
+      function buildCategoryButtons(categories) {
+        categoryFilterEl.innerHTML = '';
+        categories.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = 'category-btn' + (cat === 'All' ? ' active' : '');
+          btn.textContent = cat;
+          btn.dataset.category = cat;
+          btn.addEventListener('click', () => {
+            activeCategory = cat;
+            categoryFilterEl.querySelectorAll('.category-btn').forEach(b => {
+              b.classList.toggle('active', b.dataset.category === cat);
+            });
+            applyFilters();
+          });
+          categoryFilterEl.appendChild(btn);
+        });
+      }
+
+      // build the "added in" version dropdown, newest first
+      function buildVersionOptions() {
+        const versions = [...new Set(allEmojis.map(e => e.added_in).filter(Boolean))]
+          .sort(compareVersions)
+          .reverse();
+
+        versionSelect.innerHTML = '';
+
+        const allOpt = document.createElement('option');
+        allOpt.value = 'all';
+        allOpt.textContent = 'All versions';
+        versionSelect.appendChild(allOpt);
+
+        versions.forEach(v => {
+          const opt = document.createElement('option');
+          opt.value = v;
+          opt.textContent = 'Added in ' + v + (v === newestEmojiVersion ? ' · new' : '');
+          versionSelect.appendChild(opt);
+        });
+      }
+
+      // check if an emoji matches the current search and filters
+      function matchesFilters(emoji, term) {
+        if (activeCategory !== 'All' && emoji.category !== activeCategory) return false;
+        if (activeVersion !== 'all' && String(emoji.added_in || '') !== activeVersion) return false;
+        if (!term) return true;
+        return emoji._search.includes(term);
+      }
+
+      // apply the current search term, category, and version filter, then re-render
+      function applyFilters() {
+        const term = normalize(searchTerm);
+        const seen = new Set();
+        filteredFamilies = [];
+
+        for (const emoji of allEmojis) {
+          const family = familyByEmoji.get(emoji);
+          if (!family || seen.has(family)) continue;
+
+          const visible = family.members.filter(m => matchesFilters(m, term));
+          if (visible.length === 0) continue;
+
+          seen.add(family);
+          filteredFamilies.push({
+            representative: pickRepresentative(visible),
+            members: family.members,
+            visibleCount: visible.length,
+          });
+        }
+
+        currentPage = 1;
+        renderGrid();
+      }
+
+      // create a single emoji card DOM element
+      function createCard(family) {
+        const rep = family.representative;
+        const char = unifiedToChar(rep.unified);
+        if (!char) return null;
+
+        const label = displayName(rep);
+        const card = document.createElement('div');
+        card.className = 'emoji-card';
+        card.title = label + ' — :' + rep.short_name + ':' +
+          (family.members.length > 1 ? ' · ' + family.members.length + ' variants' : '');
+        card.setAttribute('role', 'button');
+        card.tabIndex = 0;
+        
+        // Store data directly on the DOM node to avoid closure allocations
+        card._rep = rep;
+        card._family = family;
+
+        const charSpan = document.createElement('span');
+        charSpan.className = 'emoji-char';
+        charSpan.textContent = char;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'emoji-name';
+        nameSpan.textContent = label;
+
+        card.appendChild(charSpan);
+        card.appendChild(nameSpan);
+
+        if (family.members.some(m => String(m.added_in || '') === newestEmojiVersion)) {
+          const badge = document.createElement('span');
+          badge.className = 'new-badge';
+          badge.textContent = 'NEW';
+          card.appendChild(badge);
+        }
+
+        if (family.members.length > 1) {
+          const vBadge = document.createElement('span');
+          vBadge.className = 'variant-badge';
+          vBadge.textContent = family.members.length;
+          card.appendChild(vBadge);
+        }
+
+        return card;
+      }
+
+      // render the current page of emojis
+      function renderGrid() {
+        if (filteredFamilies.length === 0) {
+          containerEl.innerHTML = '<div class="loading">😕 No emojis match your filters.</div>';
+          statsEl.textContent = '0 emojis';
+          return;
+        }
+
+        const totalPages = Math.ceil(filteredFamilies.length / ITEMS_PER_PAGE);
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredFamilies.length);
+        const pageItems = filteredFamilies.slice(startIndex, endIndex);
+
+        const fragment = document.createDocumentFragment();
+
+        if (groupedView) {
+          const groups = new Map();
+          pageItems.forEach(family => {
+            const sub = family.representative.subcategory || 'Other';
+            if (!groups.has(sub)) groups.set(sub, []);
+            groups.get(sub).push(family);
+          });
+
+          groups.forEach((families, subcategory) => {
+            const section = document.createElement('section');
+            section.className = 'emoji-section';
+
+            const header = document.createElement('div');
+            header.className = 'subcat-header';
+
+            const title = document.createElement('span');
+            title.className = 'subcat-title';
+            title.textContent = prettySubcategory(subcategory);
+
+            const count = document.createElement('span');
+            count.className = 'subcat-count';
+            count.textContent = families.length;
+
+            header.appendChild(title);
+            header.appendChild(count);
+            section.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'emoji-grid';
+
+            families.forEach(family => {
+              const card = createCard(family);
+              if (card) grid.appendChild(card);
+            });
+
+            section.appendChild(grid);
+            fragment.appendChild(section);
+          });
+        } else {
+          const grid = document.createElement('div');
+          grid.className = 'emoji-grid';
+
+          pageItems.forEach(family => {
+            const card = createCard(family);
+            if (card) grid.appendChild(card);
+          });
+
+          fragment.appendChild(grid);
+        }
+
+        // build pagination controls
+        if (totalPages > 1) {
+          const pagination = document.createElement('div');
+          pagination.className = 'pagination';
+
+          const prevBtn = document.createElement('button');
+          prevBtn.className = 'page-btn';
+          prevBtn.textContent = 'Previous';
+          prevBtn.disabled = currentPage === 1;
+          prevBtn.addEventListener('click', () => {
+            currentPage--;
+            renderGrid();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+
+          const pageInfo = document.createElement('span');
+          pageInfo.className = 'page-info';
+          pageInfo.textContent = 'Page ' + currentPage + ' of ' + totalPages;
+
+          const nextBtn = document.createElement('button');
+          nextBtn.className = 'page-btn';
+          nextBtn.textContent = 'Next';
+          nextBtn.disabled = currentPage === totalPages;
+          nextBtn.addEventListener('click', () => {
+            currentPage++;
+            renderGrid();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+
+          pagination.appendChild(prevBtn);
+          pagination.appendChild(pageInfo);
+          pagination.appendChild(nextBtn);
+          fragment.appendChild(pagination);
+        }
+
+        // Clear container efficiently
+        while (containerEl.firstChild) {
+          containerEl.removeChild(containerEl.firstChild);
+        }
+        containerEl.appendChild(fragment);
+
+        const totalEmojis = allEmojis.length;
+        const catLabel = activeCategory === 'All' ? '' : ' in "' + activeCategory + '"';
+        const verLabel = activeVersion === 'all' ? '' : ' · added in ' + activeVersion;
+        const searchLabel = searchTerm ? ' matching "' + searchTerm + '"' : '';
+
+        statsEl.textContent =
+          'Showing ' + (startIndex + 1) + '–' + endIndex + ' of ' + filteredFamilies.length + ' groups ' +
+          '(' + totalEmojis + ' emojis total)' + catLabel + verLabel + searchLabel +
+          ' · data v' + packageVersion;
+      }
+
+      // add a row to the modal info list
+      function addInfoRow(label, value) {
+        const dt = document.createElement('dt');
+        dt.textContent = label;
+        const dd = document.createElement('dd');
+        dd.textContent = value;
+        modalInfo.appendChild(dt);
+        modalInfo.appendChild(dd);
+      }
+
+      // get skin variations as an array, or an empty array
+      function getVariations(emoji) {
+        const source = emoji.skin_variations || emoji.variations || null;
+        return source ? Object.values(source) : [];
+      }
+
+      // build the skin tone thumbnails under the big emoji
+      function renderSkinGallery() {
+        skinGallery.innerHTML = '';
+        const variations = getVariations(currentEmoji);
+
+        if (!variations.length) {
+          skinSection.style.display = 'none';
+          return;
+        }
+        skinSection.style.display = '';
+
+        const base = document.createElement('button');
+        base.type = 'button';
+        base.className = 'variation-thumb' + (currentVariation === null ? ' selected' : '');
+        base.textContent = unifiedToChar(currentEmoji.unified);
+        base.title = 'Default';
+        base.setAttribute('aria-label', 'Default skin tone');
+        base.addEventListener('click', () => {
+          currentVariation = null;
+          renderModal();
+        });
+        skinGallery.appendChild(base);
+
+        variations.forEach(v => {
+          const thumb = document.createElement('button');
+          thumb.type = 'button';
+          thumb.className = 'variation-thumb' + (currentVariation === v ? ' selected' : '');
+          thumb.textContent = unifiedToChar(v.unified);
+          thumb.title = 'Skin tone · added in ' + (v.added_in || '—');
+          thumb.setAttribute('aria-label', thumb.title);
+          thumb.addEventListener('click', () => {
+            currentVariation = v;
+            renderModal();
+          });
+          skinGallery.appendChild(thumb);
+        });
+      }
+
+      // build the family variant thumbnails
+      function renderRelatedGallery() {
+        relatedGallery.innerHTML = '';
+        const members = currentFamily ? currentFamily.members : [currentEmoji];
+
+        if (members.length <= 1) {
+          relatedSection.style.display = 'none';
+          return;
+        }
+        relatedSection.style.display = '';
+
+        // sorting by added_in / length instead of non-existent sort_order
+        const ordered = [...members].sort((a, b) => a.short_name.localeCompare(b.short_name));
+
+        ordered.forEach(m => {
+          const thumb = document.createElement('button');
+          thumb.type = 'button';
+          thumb.className = 'variation-thumb' + (m === currentEmoji ? ' selected' : '');
+          thumb.textContent = unifiedToChar(m.unified);
+          thumb.title = displayName(m) + ' — :' + m.short_name + ':';
+          thumb.setAttribute('aria-label', thumb.title);
+          thumb.addEventListener('click', () => {
+            currentEmoji = m;
+            currentVariation = null;
+            renderModal();
+          });
+          relatedGallery.appendChild(thumb);
+        });
+      }
+
+      // rebuild the modal's info table for the current emoji/variation
+      function renderModalInfo() {
+        modalInfo.innerHTML = '';
+        if (!currentEmoji) return;
+
+        const source = currentVariation || currentEmoji;
+
+        addInfoRow('Unicode', source.unified.split('-').map(h => 'U+' + h.toUpperCase()).join(' '));
+
+        addInfoRow('Category', currentEmoji.category);
+        if (currentEmoji.subcategory) {
+          addInfoRow('Subcategory', prettySubcategory(currentEmoji.subcategory));
+        }
+
+        addInfoRow('Added in', 'Emoji ' + (source.added_in || '—'));
+
+        const aliases = (currentEmoji.short_names || []).filter(n => n !== currentEmoji.short_name);
+        if (aliases.length) {
+          addInfoRow('Aliases', aliases.map(a => ':' + a + ':').join('  '));
+        }
+
+        const variations = getVariations(currentEmoji);
+        if (variations.length) {
+          addInfoRow('Skin tones', variations.length);
+        }
+      }
+
+      function renderModal() {
+        modalEmoji.textContent = unifiedToChar(currentVariation ? currentVariation.unified : currentEmoji.unified);
+        modalTitle.textContent = modalDisplayName(currentEmoji);
+        modalCode.textContent = ':' + currentEmoji.short_name + ':';
+
+        renderSkinGallery();
+        renderRelatedGallery();
+        renderModalInfo();
+      }
+
+      // open the detail modal for a given emoji
+      function openModal(emoji, family) {
+        currentEmoji = emoji;
+        currentVariation = null;
+        currentFamily = family || { representative: emoji, members: [emoji] };
+
+        renderModal();
+
+        modalOverlay.classList.add('open');
+        document.body.classList.add('modal-open');
+        modalCode.focus({ preventScroll: true });
+      }
+
+      // close the modal and clear the current selection
+      function closeModal() {
+        modalOverlay.classList.remove('open');
+        document.body.classList.remove('modal-open');
+        currentEmoji = null;
+        currentVariation = null;
+        currentFamily = null;
+      }
+
+      // copy the base Discord shortcode for the open emoji
+      function copyCurrent() {
+        if (currentEmoji) copyToClipboard(':' + currentEmoji.short_name + ':');
+      }
+
+      // copy the raw emoji character (respects the selected variation)
+      function copyEmoji() {
+        if (!currentEmoji) return;
+        const unified = currentVariation ? currentVariation.unified : currentEmoji.unified;
+        copyToClipboard(String.fromCodePoint(...unified.split("-").map(c => parseInt(c, 16))));
+      }
+
+      // toggle between grouped and ungrouped grid views
+      viewToggleBtn.addEventListener('click', () => {
+        groupedView = !groupedView;
+        viewToggleBtn.classList.toggle('active', groupedView);
+        viewToggleBtn.title = groupedView ? 'Group by subcategory' : 'Show all in one grid';
+        viewToggleBtn.innerHTML = groupedView
+          ? '<i class="fa-solid fa-border-all"></i>'
+          : '<i class="fa-solid fa-layer-group"></i>';
+        renderGrid();
+      });
+
+      modalClose.addEventListener('click', closeModal);
+      modalOverlay.addEventListener('click', e => {
+        if (e.target === modalOverlay) closeModal();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && modalOverlay.classList.contains('open')) closeModal();
+      });
+      modalCode.addEventListener('click', copyCurrent);
+      modalEmoji.addEventListener('click', copyEmoji);
+
+      // Event delegation for cards to save hundreds of listeners
+      containerEl.addEventListener('click', e => {
+        const card = e.target.closest('.emoji-card');
+        if (card) openModal(card._rep, card._family);
+      });
+      containerEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          const card = e.target.closest('.emoji-card');
+          if (card) {
+            e.preventDefault();
+            openModal(card._rep, card._family);
+          }
+        }
+      });
+
+      versionSelect.addEventListener('change', () => {
+        activeVersion = versionSelect.value;
+        applyFilters();
+      });
+
+      // debounce the search input so we don't re-filter on every keystroke
+      let debounceTimer = null;
+      searchInput.addEventListener('input', e => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          searchTerm = e.target.value;
+          applyFilters();
+        }, 150);
+      });
+
+      // keep the sticky offset accurate when the header wraps or resizes
+      window.addEventListener('resize', measureHeaderHeight);
+      window.addEventListener('load', measureHeaderHeight);
+      if (typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(measureHeaderHeight).observe(document.querySelector('header'));
+      }
+
+      // resolve the latest package version first, then load its data
+      (async function init() {
+        packageVersion = await getLatestPackageVersion();
+        await fetchEmojis();
+      })();
+    })();
+  </script>
+</body>
+</html>
